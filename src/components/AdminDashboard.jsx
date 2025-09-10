@@ -298,14 +298,24 @@ const AdminDashboard = () => {
         )}
 
         {/* Students Table */}
-        <div className="card">
+          <div className="card">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Students ({total})</h2>
                 <p className="text-sm text-gray-600">Manage all student records</p>
               </div>
-              <div className="mt-4 sm:mt-0">
+              <div className="mt-4 sm:mt-0 flex gap-2">
+                <button
+                  onClick={loadStudents}
+                  className="btn-secondary inline-flex items-center"
+                  title="Refresh student data"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
+                </button>
                 <button
                   onClick={handleAddStudent}
                   className="btn-primary inline-flex items-center"
@@ -315,9 +325,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
-          </div>
-
-          {loading ? (
+          </div>          {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               <span className="ml-3 text-gray-600">Loading students...</span>
@@ -361,13 +369,33 @@ const AdminDashboard = () => {
                           {formatDate(student.enrollmentDate)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            student.userId?.isEmailVerified 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {student.userId?.isEmailVerified ? 'Verified' : 'Pending'}
-                          </span>
+                          {(() => {
+                            // Use the enhanced verification status if available
+                            const verificationStatus = student.verificationStatus;
+                            const isVerified = verificationStatus 
+                              ? verificationStatus.isVerified 
+                              : (student.userId?.isEmailVerified || student.isVerified);
+                            
+                            return (
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  isVerified
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {isVerified ? 'Verified' : 'Pending'}
+                                </span>
+                                {verificationStatus && (
+                                  <div 
+                                    className="text-xs text-gray-400 cursor-help" 
+                                    title={`User Verified: ${verificationStatus.userVerified ? 'Yes' : 'No'}, Student Verified: ${verificationStatus.studentVerified ? 'Yes' : 'No'}`}
+                                  >
+                                    ℹ️
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                           <div className="flex items-center justify-center space-x-2">
